@@ -37,7 +37,7 @@ function Invoke-ForceWebRequest {
                 $full = "$domain" + "\" + "$username"
                 $password = $cred.GetNetworkCredential().password
                 Add-Type -assemblyname System.DirectoryServices.AccountManagement
-                $DS = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine) -ErrorAction SilentlyContinue
+                $DS = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine)
             } while($DS.ValidateCredentials("$full", "$password") -ne $True);
             
             $output = $cred.GetNetworkCredential() | select-object UserName, Domain, Password
@@ -80,7 +80,7 @@ function Invoke-ForceWebRequest {
 
             # Ensure URLs contains at least an 'http' protocol:
             if (-not ($URL -match "http")) { $URL = 'http://'+$URL }
-            if (-not ($ProxyURL -match "http")) { $ProxyURL = 'http://'+$ProxyURL }
+            if (($ProxyURL -ne $null) -and (-not ($ProxyURL -match "http"))) { $ProxyURL = 'http://'+$ProxyURL }
 
             $request = [System.Net.WebRequest]::Create($URL)
             $request.UserAgent = $UserAgent
