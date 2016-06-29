@@ -95,21 +95,15 @@ function Invoke-ForceWebRequest {
                 if ($ProxyUser) {
                     if ($ProxyDefaultCredentials) {
                         $request.UseDefaultCredentials = $true
-                        Write-Verbose "Established proxy URL to $ProxyURL and using default credentials"
                     }
                     else {
                         $secure_password    = ConvertTo-SecureString $ProxyPassword -AsPlainText -Force;
                         $proxy.Credentials  = New-Object System.Management.Automation.PSCredential ($ProxyUser, $secure_password);
-
-                        Write-Verbose "Established proxy URL to $ProxyURL and using $ProxyUser credentials"
                     }
                 }
-                else { Write-Verbose "Established proxy URL to $ProxyURL" }
             }
 
             try {
-                Write-Verbose "Trying to get $URL"
-
                 $response               = $request.GetResponse()
                 $response_stream        = $response.GetResponseStream();
                 $response_stream_reader = New-Object System.IO.StreamReader $response_stream;
@@ -134,8 +128,8 @@ function Invoke-ForceWebRequest {
     }
     process {
         # Ensure URLs contains at least an 'http' protocol:
-        if (-not ($URL -match "http")) { $URL = 'http://'+$URL }
-        if (-not ($DummyURL -match "http")) { $DummyURL = 'http://'+$DummyURL }
+        if (-not ($URL -match "http")) { $URL = 'http://'+$URL; Write-Verbose "New URL: $URL" }
+        if (-not ($DummyURL -match "http")) { $DummyURL = 'http://'+$DummyURL; Write-Verbose "New DummyURL: $DummyURL" }
 
         # 1: no-proxy webrequest
         Write-Verbose "Trying http get with method #1: simple request..."
