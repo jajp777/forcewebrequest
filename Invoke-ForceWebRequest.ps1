@@ -190,7 +190,7 @@ function Invoke-ForceWebRequest {
                         # request dummystring for each proxy-url
                         $proxy_server_pac = $_.Groups["proxy"].Value
 
-                        Write-Verbose "Trying http get with method #4.1: request with URL proxy from .pac file ($proxy_server_pac) and $username credential..."
+                        Write-Verbose "Trying http get with method #4.2: request with URL proxy from .pac file ($proxy_server_pac) and $username credential..."
                         $request = Invoke-BasicWebRequest $DummyURL -ProxyURL $proxy_server_pac -ProxyUser $username -ProxyPassword $password
                         if ($request | select -first 1 | % { $_.content -match $DummyString }) { return }
                     }
