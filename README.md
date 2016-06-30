@@ -22,11 +22,11 @@ StatusCode Content
 
 Using the function in a computer that have an authenticated proxy, user will be prompt for a valid proxy credentials. Note that user will be prompt until he/she writes a valid credential.
 
-![Invoke-ForceWebRequest](http://ferreira.fm/github/invoke-forcewebclient/requesting-credentials.png "cmd and powershell console theme")
+![Invoke-ForceWebRequest](http://ferreira.fm/github/invoke-forcewebrequest/requesting-credentials.png "powershell webrequest proxy credentials")
 
 When the user writes a valid credential, html will be returned.
 
-![Invoke-ForceWebRequest](http://ferreira.fm/github/invoke-forcewebclient/proxy-enabled.png "cmd and powershell console theme")
+![Invoke-ForceWebRequest](http://ferreira.fm/github/invoke-forcewebrequest/proxy-enabled.png "powershell webrequest proxy credentials granted")
 
  
 

