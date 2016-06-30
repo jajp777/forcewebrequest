@@ -4,7 +4,7 @@ Force HTTP GET in a computer with unknow internet config, trying to download the
 ## Description
 
 Normally this script should be used in a pentest environment, when you're running this code in a target computer where you don't know exactly what is the outbound internet config. Internally, Invoke-ForceWebRequest will use another two functions:
-* Invoke-BasicWebRequest: another function writed by me which allow me to create http webrequest with proxy config. Similar (but very basic) to Invoke-WebRequest native PowerShell function (which is only available on PowerShell v3+).
+* [Invoke-BasicWebRequest](https://github.com/daniel0x00/basicwebrequest): another function writed by me which allow me to create http webrequest with proxy config. Similar (but very basic) to Invoke-WebRequest native PowerShell function (which is only available on PowerShell v3+).
 * [Invoke-LoginPrompt](https://github.com/enigma0x3/Invoke-LoginPrompt): an improved version of this great function wrote by [@enigma0x3](https://github.com/enigma0x3)
 
 ## Usage
