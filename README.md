@@ -4,7 +4,7 @@ This function will force an HTTP GET in a computer with unknow internet config, 
 ## Description
 
 Normally this function should be used in a pentest environment, when you're running this code in a target computer where you don't know exactly what is the outbound internet config. Internally, Invoke-ForceWebRequest will use another two functions:
-* [Invoke-BasicWebRequest](https://github.com/daniel0x00/basicwebrequest): another function writed by me which allow me to create http webrequest with proxy config. Similar (but very basic) to Invoke-WebRequest native PowerShell function (which is only available on PowerShell v3+).
+* [Invoke-BasicWebRequest](https://github.com/daniel0x00/basicwebrequest): another function written by me which allow me to create http webrequest with proxy config. Similar (but very basic) to Invoke-WebRequest native PowerShell function (which is only available on PowerShell v3+).
 * [Invoke-LoginPrompt](https://github.com/enigma0x3/Invoke-LoginPrompt): an improved version of this great function wrote by [@enigma0x3](https://github.com/enigma0x3)
 
 ## Usage
@@ -29,7 +29,7 @@ When the user writes a valid credential, html will be returned.
 ![Invoke-ForceWebRequest](http://ferreira.fm/github/invoke-forcewebrequest/proxy-enabled.png "powershell webrequest proxy credentials granted")
 
  
- ## Redteam usage
+## Redteam usage
 
 From red-team point of view: let's say you are able to run some PowerShell code in the target machine through a VBA Macro or a malicious EXE, but you really don't know how the computer is connected to internet. So you run this payload to be sure you will get response from your target:
 ```
