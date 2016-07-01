@@ -3,7 +3,7 @@ function Invoke-ForceWebRequest {
     <#
 
     .SYNOPSIS
-        Force HTTP GET in a computer with unknow internet config, trying to download the URL by downloading it directly and if it can't then using default proxy credentials and .pac proxy list. If none o them works, it will trick the user and request his credentials using the Windows default credential prompt.
+        This function will force an HTTP GET in a computer with unknow internet config, trying to download the URL by downloading it directly and if it can't then using default proxy credentials and .pac proxy list. If none o them works, it will trick the user and request his credentials using the Windows default credential prompt.
 
     .PARAMETER URL
         [String], required=true, ValueFromPipeline=true
@@ -139,15 +139,12 @@ function Invoke-ForceWebRequest {
                 $proxy = New-Object System.Net.WebProxy
                 $proxy.Address = $ProxyURL
                 $request.Proxy = $proxy
-
+                
+                if ($ProxyDefaultCredentials) { $request.UseDefaultCredentials = $true }
+                
                 if ($ProxyUser) {
-                    if ($ProxyDefaultCredentials) {
-                        $request.UseDefaultCredentials = $true
-                    }
-                    else {
-                        $secure_password    = ConvertTo-SecureString $ProxyPassword -AsPlainText -Force;
-                        $proxy.Credentials  = New-Object System.Management.Automation.PSCredential ($ProxyUser, $secure_password);
-                    }
+                    $secure_password    = ConvertTo-SecureString $ProxyPassword -AsPlainText -Force;
+                    $proxy.Credentials  = New-Object System.Management.Automation.PSCredential ($ProxyUser, $secure_password);
                 }
             }
 
